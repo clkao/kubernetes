@@ -21,8 +21,9 @@ package kuberuntime
 import (
 	"time"
 
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	utilfeature "k8s.io/apiserver/pkg/util/feature"
+	v1qos "k8s.io/kubernetes/pkg/apis/core/v1/helper/qos"
 	kubefeatures "k8s.io/kubernetes/pkg/features"
 	runtimeapi "k8s.io/kubernetes/pkg/kubelet/apis/cri/runtime/v1alpha2"
 	"k8s.io/kubernetes/pkg/kubelet/qos"
@@ -66,7 +67,7 @@ func (m *kubeGenericRuntimeManager) generateLinuxContainerConfig(container *v1.C
 	// be killed first if the system runs out of memory.
 	lc.Resources.OomScoreAdj = oomScoreAdj
 
-	if m.cpuCFSQuota {
+	if m.cpuCFSQuota && v1qos.GetPodQOS(pod) != v1.PodQOSGuaranteed {
 		// if cpuLimit.Amount is nil, then the appropriate default value is returned
 		// to allow full usage of cpu resource.
 		cpuPeriod := int64(quotaPeriod)
